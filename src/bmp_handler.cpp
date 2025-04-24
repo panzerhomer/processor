@@ -2,51 +2,53 @@
 #include <fstream>
 #include <stdexcept>
 
+using namespace BMPConstants;
+
 Image BMPReader::Read(const std::string& path) {
     std::ifstream file(path, std::ios::binary);
     if (!file) {
-        throw std::runtime_error("Failed to open file: " + path);
+        throw std::runtime_error(ERROR_OPEN_FILE + path);
     }
 
     BMPFileHeader fileHeader;
     file.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
     if (!file) {
-        throw std::runtime_error("Failed to read BMP file header");
+        throw std::runtime_error(ERROR_READ_HEADER);
     }
-    if (fileHeader.signature != 0x4D42) { 
-        throw std::runtime_error("Invalid BMP signature");
+    if (fileHeader.signature != SIGNATURE_BM) {
+        throw std::runtime_error(ERROR_INVALID_SIGNATURE);
     }
-        
+
     BMPInfoHeader infoHeader;
     file.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
     if (!file) {
-        throw std::runtime_error("Failed to read BMP info header");
+        throw std::runtime_error(ERROR_READ_HEADER);
     }
 
-    if (infoHeader.bitsPerPixel != 24) {
-        throw std::runtime_error("Only 24-bit BMP supported");
+    if (infoHeader.bitsPerPixel != BITS_PER_PIXEL_24) {
+        throw std::runtime_error(ERROR_UNSUPPORTED_BPP);
     }
 
     const size_t width = infoHeader.width;
     const size_t height = infoHeader.height;
-    const int row_bytes = width * 3;
-    const int padding = (4 - (row_bytes % 4)) % 4;
+    const int row_bytes = width * BYTES_PER_PIXEL;
+    const int padding = (PADDING_ALIGNMENT - (row_bytes % PADDING_ALIGNMENT)) % PADDING_ALIGNMENT;
 
     Image image(width, height);
 
     for (int row = height - 1; row >= 0; row--) {
         for (size_t col = 0; col < width; col++) {
             Pixel pixel;
-            file.read(reinterpret_cast<char*>(&pixel), 3);
+            file.read(reinterpret_cast<char*>(&pixel), BYTES_PER_PIXEL);
             if (file.fail()) {
-                throw std::runtime_error("Error reading pixel data");
+                throw std::runtime_error(ERROR_READ_PIXELS);
             }
             image.setPixel(col, row, pixel);
         }
         
         file.ignore(padding);
         if (!file) {
-            throw std::runtime_error("Error skipping row padding");
+            throw std::runtime_error(ERROR_SKIP_PADDING);
         }
     }
 
@@ -56,45 +58,45 @@ Image BMPReader::Read(const std::string& path) {
 void BMPWriter::Write(const std::string& path, const Image& image) {
     std::ofstream file(path, std::ios::binary);
     if (!file) {
-        throw std::runtime_error("Failed to create file: " + path);
+        throw std::runtime_error(ERROR_CREATE_FILE + path);
     }
 
     const size_t width = image.width();
     const size_t height = image.height();
-    const int row_bytes = width * 3;
-    const int padding = (4 - (row_bytes % 4)) % 4;
+    const int row_bytes = width * BYTES_PER_PIXEL;
+    const int padding = (PADDING_ALIGNMENT - (row_bytes % PADDING_ALIGNMENT)) % PADDING_ALIGNMENT;
 
     BMPFileHeader fileHeader;
-    fileHeader.signature = 0x4D42;
-    fileHeader.fileSize = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + (row_bytes + padding) * height;
+    fileHeader.signature = SIGNATURE_BM;
+    fileHeader.fileSize = sizeof(fileHeader) + sizeof(BMPInfoHeader) + (row_bytes + padding) * height;
     fileHeader.reserved1 = 0;
     fileHeader.reserved2 = 0;
-    fileHeader.dataOffset = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader);
+    fileHeader.dataOffset = sizeof(fileHeader) + sizeof(BMPInfoHeader);
 
     BMPInfoHeader infoHeader;
     infoHeader.headerSize = sizeof(BMPInfoHeader);
     infoHeader.width = width;
     infoHeader.height = height;
-    infoHeader.planes = 1;
-    infoHeader.bitsPerPixel = 24;
-    infoHeader.compression = 0;
+    infoHeader.planes = DEFAULT_PLANES;
+    infoHeader.bitsPerPixel = BITS_PER_PIXEL_24;
+    infoHeader.compression = COMPRESSION_NONE;
     infoHeader.imageSize = (row_bytes + padding) * height;
-    infoHeader.xPixelsPerMeter = 0;
-    infoHeader.yPixelsPerMeter = 0;
-    infoHeader.colorsUsed = 0;
-    infoHeader.colorsImportant = 0;
+    infoHeader.xPixelsPerMeter = DEFAULT_RESOLUTION;
+    infoHeader.yPixelsPerMeter = DEFAULT_RESOLUTION;
+    infoHeader.colorsUsed = NO_COLOR_TABLE;
+    infoHeader.colorsImportant = NO_COLOR_TABLE;
 
     file.write(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
     file.write(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
 
     for (int row = height - 1; row >= 0; row--) {
         for (size_t col = 0; col < width; col++) {
-            Pixel pixel = image.getPixel(col, row);
-            file.write(reinterpret_cast<char*>(&pixel), 3);
+            const Pixel pixel = image.getPixel(col, row);
+            file.write(reinterpret_cast<const char*>(&pixel), BYTES_PER_PIXEL);
         }
 
         for (int p = 0; p < padding; p++) {
-            file.put(0);
+            file.put(PADDING_VALUE);
         }
     }
 }

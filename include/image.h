@@ -3,6 +3,11 @@
 #include <cstdint>
 #include <vector>
 
+namespace ImageConstants {
+    const auto OUT_OF_RANGE = "Coordinates are outside of width or/and height";
+    const auto OVERFLOW_PIXELS = "Computed position overflows pixels";
+}
+
 struct Pixel {
     uint8_t blue = 0;
     uint8_t green = 0;
