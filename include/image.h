@@ -4,8 +4,7 @@
 #include <vector>
 
 namespace ImageConstants {
-    const auto OUT_OF_RANGE = "Coordinates are outside of width or/and height";
-    const auto OVERFLOW_PIXELS = "Computed position overflows pixels";
+    const auto COORDS_OUT_OF_RANGE = "Coordinates are outside of width or/and height";
 }
 
 struct Pixel {
@@ -18,13 +17,15 @@ class Image {
 public:
     Image(uint32_t width, uint32_t height);
 
-    Pixel& getPixel(uint32_t x, uint32_t y);
-    const Pixel& getPixel(uint32_t x, uint32_t y) const;
-    void setPixel(uint32_t x, uint32_t y, const Pixel& pixel);
+    Pixel& GetPixel(uint32_t x, uint32_t y);
+    const Pixel& GetPixel(uint32_t x, uint32_t y) const;
+    void SetPixel(uint32_t x, uint32_t y, const Pixel& pixel);
 
-    uint32_t width() const;
-    uint32_t height() const;
+    void ValidateHeightAndWeight(uint32_t x, uint32_t y) const;
 
+    uint32_t GetWidth() const;
+    uint32_t GetHeight() const;
+    
 private:
     uint32_t width_;
     uint32_t height_;
