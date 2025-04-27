@@ -14,10 +14,10 @@ Image BMPReader::Read(const std::string& path) {
     BMPFileHeader fileHeader;
     file.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
     if (file.fail()) {
-        throw std::runtime_error(ERROR_READ_HEADER);
+        throw std::invalid_argument(ERROR_READ_HEADER);
     }
     if (fileHeader.signature != SIGNATURE_BM) {
-        throw std::runtime_error(ERROR_INVALID_SIGNATURE);
+        throw std::invalid_argument(ERROR_INVALID_SIGNATURE);
     }
 
     BMPInfoHeader infoHeader;
@@ -27,7 +27,7 @@ Image BMPReader::Read(const std::string& path) {
     }
 
     if (infoHeader.bitsPerPixel != BITS_PER_PIXEL_24) {
-        throw std::runtime_error(ERROR_UNSUPPORTED_BPP);
+        throw std::invalid_argument(ERROR_UNSUPPORTED_BPP);
     }
 
     const size_t width = infoHeader.width;
@@ -50,9 +50,6 @@ Image BMPReader::Read(const std::string& path) {
         for (int i = 0; i < padding; i++) {
             char temp;
             file.get(temp);
-            if (file.fail()) {
-                throw std::runtime_error(ERROR_SKIP_PADDING);
-            }
         }
     }
 
@@ -108,9 +105,6 @@ void BMPWriter::Write(const std::string& path, const Image& image) {
 
         for (int p = 0; p < padding; p++) {
             file.put(0);
-            if (file.fail()) {
-                throw std::runtime_error(ERROR_CREATE_FILE);
-            }
         }
     }
 }
