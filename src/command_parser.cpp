@@ -4,9 +4,17 @@
 #include "filter.h"
 #include "crop_filter.h"
 #include "grey_filter.h"
+#include "mosaic_filter.h"
 
 void CommandParser::Parse(int argc, char* argv[]) {
     if (argc < 3) {
+        if (argc == 2) {
+            std::string currentArgv(argv[1]);
+            if (currentArgv == "-h" || currentArgv == "--help") {
+                PrintHelp();
+                exit(0);
+            }
+        }
         throw std::invalid_argument("Check your arguments");
     }
 
@@ -19,11 +27,16 @@ void CommandParser::Parse(int argc, char* argv[]) {
             if (i + 2 >= argc) {
                 throw std::invalid_argument("Must be two arguments for -crop");
             }
-            int width;
-            int height;
+            uint32_t width;
+            uint32_t height;
             try {
-                width = atoi(argv[i + 1]);
-                height = atoi(argv[i + 2]);
+                width = std::stoul(argv[i + 1]);
+                height = std::stoul(argv[i + 2]);
+
+                if (width <= 0 || height <= 0) {
+                    throw std::invalid_argument("Crop dimensions must be positive");
+                }
+
                 i += 2;
             } catch (const std::invalid_argument& e) {
                 throw std::invalid_argument("Invalid -crop arguments");
@@ -31,10 +44,10 @@ void CommandParser::Parse(int argc, char* argv[]) {
             filters_.push_back(std::make_unique<CropFilter>(width, height));
         } else if (currentArgv == "-gs") {
             filters_.push_back(std::make_unique<GreyFilter>());
-        } else if (currentArgv == "-h" || currentArgv == "--help") {
-            PrintHelp();
-            exit(0);
+        } else if (currentArgv == "-ms") {
+            filters_.push_back(std::make_unique<MosaicFilter>());
         } else {
+            PrintHelp();
             throw std::invalid_argument("Unknown argument: " + currentArgv);
         }
     }
@@ -42,14 +55,16 @@ void CommandParser::Parse(int argc, char* argv[]) {
 
 void CommandParser::PrintHelp() {
     std::cout << "Usage: ./image_processor ./input.bmp ./output.bmp [FILTERS...]\n"
+        << "Exmaple: ./image_processor ./input.bmp ./output.bmp -gs -ms -crop 200 200\n"
         << "Upload 24 bit bmp files only!\n"
         << "First argument is source file\n"
         << "Second argument is destination file\n\n"
         << "Filters:\n"
-        << "  -crop    Crop image to the given width and height\n"
-        << "  -gs                       Apply grey scale filter\n"
+        << "  -crop [width] [height]  Crop image to the given width and height\n"
+        << "  -gs                             Apply grey filter\n"
+        << "  -ms,                          Apply mosaic filter\n"
         << "  -h, --help                 Show this help message\n";
-}
+};
     
 std::string CommandParser::GetSourceFile() {
     return srcFile_;
@@ -59,6 +74,6 @@ std::string CommandParser::GetDestanationFile() {
     return destFile_;
 }
 
-std::vector<std::unique_ptr<IFilter>> CommandParser::GetFilters() {
-    return std::move(filters_);
+std::vector<std::unique_ptr<IFilter>>& CommandParser::GetFilters() {
+    return filters_;
 }

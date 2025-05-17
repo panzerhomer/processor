@@ -1,4 +1,5 @@
 #pragma once
+
 #include <memory>
 #include "filter.h"
 
@@ -10,10 +11,12 @@ public:
 
     std::string GetSourceFile();
     std::string GetDestanationFile();
-    std::vector<std::unique_ptr<IFilter>> GetFilters();
+    // std::vector<IFilter*> GetFilters();
+    std::vector<std::unique_ptr<IFilter>>& GetFilters();
 
 private:
     std::string srcFile_;
     std::string destFile_;
-    std::vector<std::unique_ptr<IFilter>> filters_;  
+    // std::vector<IFilter*> filters_;  
+    std::vector<std::unique_ptr<IFilter>> filters_; 
 };

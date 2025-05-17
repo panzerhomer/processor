@@ -7,13 +7,13 @@ using namespace BMPConstants;
 
 Image BMPReader::Read(const std::string& path) {
     std::ifstream file(path, std::ios::binary);
-    if (file.fail()) {
+    if (!file) {
         throw std::runtime_error(ERROR_OPEN_FILE + path);
     }
 
     BMPFileHeader fileHeader;
     file.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
-    if (file.fail()) {
+    if (!file) {
         throw std::invalid_argument(ERROR_READ_HEADER);
     }
     if (fileHeader.signature != SIGNATURE_BM) {
@@ -22,7 +22,7 @@ Image BMPReader::Read(const std::string& path) {
 
     BMPInfoHeader infoHeader;
     file.read(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
-    if (file.fail()) {
+    if (!file) {
         throw std::runtime_error(ERROR_READ_HEADER);
     }
 
@@ -53,12 +53,14 @@ Image BMPReader::Read(const std::string& path) {
         }
     }
 
+    file.close();
+
     return image;
 }
 
 void BMPWriter::Write(const std::string& path, const Image& image) {
     std::ofstream file(path, std::ios::binary);
-    if (file.fail()) {
+    if (!file) {
         throw std::runtime_error(ERROR_CREATE_FILE + path);
     }
 
@@ -90,7 +92,7 @@ void BMPWriter::Write(const std::string& path, const Image& image) {
     file.write(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
     file.write(reinterpret_cast<char*>(&infoHeader), sizeof(infoHeader));
 
-    if (file.fail()) {
+    if (!file) {
         throw std::runtime_error(ERROR_CREATE_FILE);
     }
 
@@ -98,7 +100,7 @@ void BMPWriter::Write(const std::string& path, const Image& image) {
         for (size_t col = 0; col < width; col++) {
             const Pixel pixel = image.GetPixel(col, row);
             file.write(reinterpret_cast<const char*>(&pixel), BYTES_PER_PIXEL);
-            if (file.fail()) {
+            if (!file) {
                 throw std::runtime_error(ERROR_CREATE_FILE);
             }
         }
@@ -107,4 +109,6 @@ void BMPWriter::Write(const std::string& path, const Image& image) {
             file.put(0);
         }
     }
+
+    file.close();
 }
