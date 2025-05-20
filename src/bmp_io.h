@@ -1,11 +1,28 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include "image.h"
-#include <stdexcept>
-#include <iostream>
-#include <fstream>
-#include <cstdint>
+
+namespace BMPConstants {
+    const auto ERROR_OPEN_FILE = "Failed to open file: ";
+    const auto ERROR_READ_HEADER = "Failed to read BMP header";
+    const auto ERROR_INVALID_SIGNATURE = "Wrong BMP signature";
+    const auto ERROR_UNSUPPORTED_BPP = "Only 24-bit BMP supported";
+    const auto ERROR_READ_PIXELS = "Error reading pixel data";
+    const auto ERROR_SKIP_PADDING = "Error skipping row padding";
+    const auto ERROR_CREATE_FILE = "Failed to create file: ";
+
+    const uint16_t SIGNATURE_BM = 0x4D42;  // 'BM'
+    const int BITS_PER_PIXEL_24 = 24;
+    const int BYTES_PER_PIXEL = 3;
+    const int PADDING_ALIGNMENT = 4;
+    
+    const uint16_t DEFAULT_PLANES = 1;
+    const uint32_t COMPRESSION_NONE = 0;
+    const uint32_t DEFAULT_RESOLUTION = 0;
+    const uint32_t NO_COLOR_TABLE = 0;
+}
 
 #pragma pack(push, 1)
 struct BMPFileHeader {
