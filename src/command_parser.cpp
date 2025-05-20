@@ -45,7 +45,21 @@ void CommandParser::Parse(int argc, char* argv[]) {
         } else if (currentArgv == "-gs") {
             filters_.push_back(std::make_unique<GreyFilter>());
         } else if (currentArgv == "-ms") {
-            filters_.push_back(std::make_unique<MosaicFilter>());
+            if (i + 1 >= argc) {
+                throw std::invalid_argument("Must be one argument for -ms");
+            }
+            uint32_t pixelSize;
+            try {
+                pixelSize = std::stoul(argv[i + 1]);
+                if (pixelSize <= 0) {
+                    throw std::invalid_argument("Pixel size must be positive");
+                }
+
+                filters_.push_back(std::make_unique<MosaicFilter>(pixelSize));
+                i++; 
+            } catch (const std::invalid_argument& e) {
+                throw std::invalid_argument("Invalid -ms argument");
+            }
         } else {
             PrintHelp();
             throw std::invalid_argument("Unknown argument: " + currentArgv);

@@ -1,8 +1,10 @@
 #include "image.h"
 #include "mosaic_filter.h"
 
+MosaicFilter::MosaicFilter(uint32_t size) : size_(size) {}
+
 void MosaicFilter::Apply(Image& image) const {
-    const uint32_t size = 10;
+    const uint32_t size = size_;
     const uint32_t width = image.GetWidth();
     const uint32_t height = image.GetHeight();
 
