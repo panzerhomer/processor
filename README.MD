@@ -13,4 +13,5 @@
 1. ```cmake -B build```
 2. ```cd build```
 3. ```make```
-4. 
+4. В ```build/src``` лежит приложение ```imageproc_run```
+5. В ```build/tests``` лежит приложение c тестами ```imageproc_tst```
