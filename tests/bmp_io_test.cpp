@@ -2,36 +2,38 @@
 #include <filesystem>
 #include "bmp_io.h"
 
+const std::string pathToPics = "../../pics/";
+
 TEST(BMPReaderTest, ReadFlagImage) {
-    std::string input = "pics/flag.bmp";
+    std::string input = pathToPics + "flag.bmp";
     Image image = BMPReader::Read(input);
     EXPECT_EQ(image.GetWidth(), 16); 
     EXPECT_EQ(image.GetHeight(), 16); 
 }
 
 TEST(BMPReaderTest, ReadNatureImage) {
-    std::string input = "pics/nature.bmp";
+    std::string input =  pathToPics + "nature.bmp";
     Image image = BMPReader::Read(input);
     EXPECT_EQ(image.GetWidth(), 640); 
     EXPECT_EQ(image.GetHeight(), 426); 
 }
 
 TEST(BMPReaderTest, ReadSquareImage) {
-    std::string input = "pics/square.bmp";
+    std::string input = pathToPics + "square.bmp";
     Image image = BMPReader::Read(input);
     EXPECT_EQ(image.GetWidth(), 2); 
     EXPECT_EQ(image.GetHeight(), 2); 
 }
 
 TEST(BMPReaderTest, FailReadNonBMPFile) {
-    std::string input = "pics/test.png";
+    std::string input = pathToPics + "test.png";
     EXPECT_THROW({
         Image image = BMPReader::Read(input);
     }, std::exception);
 }
 
 TEST(BMPReaderWriterTest, WriteAndReadBack) {
-    std::string input = "pics/flag.bmp";
+    std::string input = pathToPics + "flag.bmp";
     Image originalImage = BMPReader::Read(input);
     
     std::string tempOutput = "temp_flag.bmp";
