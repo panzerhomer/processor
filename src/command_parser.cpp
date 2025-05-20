@@ -5,6 +5,7 @@
 #include "crop_filter.h"
 #include "grey_filter.h"
 #include "mosaic_filter.h"
+#include "negative_filter.h"
 
 void CommandParser::Parse(int argc, char* argv[]) {
     if (argc < 3) {
@@ -44,6 +45,8 @@ void CommandParser::Parse(int argc, char* argv[]) {
             filters_.push_back(std::make_unique<CropFilter>(width, height));
         } else if (currentArgv == "-gs") {
             filters_.push_back(std::make_unique<GreyFilter>());
+        } else if (currentArgv == "-neg") {
+            filters_.push_back(std::make_unique<NegativeFilter>());
         } else if (currentArgv == "-ms") {
             if (i + 1 >= argc) {
                 throw std::invalid_argument("Must be one argument for -ms");
@@ -77,6 +80,7 @@ void CommandParser::PrintHelp() {
         << "  -crop [width] [height]  Crop image to the given width and height\n"
         << "  -gs                             Apply grey filter\n"
         << "  -ms,                          Apply mosaic filter\n"
+        << "  -neg,                       Apply negative filter\n"
         << "  -h, --help                 Show this help message\n";
 };
     
